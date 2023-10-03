@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include inventeam_avh_app *.css
+recursive-include inventeam_avh_app *.csv
+recursive-include inventeam_avh_app *.html
+recursive-include inventeam_avh_app *.ico
+recursive-include inventeam_avh_app *.js
+recursive-include inventeam_avh_app *.json
+recursive-include inventeam_avh_app *.md
+recursive-include inventeam_avh_app *.png
+recursive-include inventeam_avh_app *.py
+recursive-include inventeam_avh_app *.svg
+recursive-include inventeam_avh_app *.txt
+recursive-exclude inventeam_avh_app *.pyc
