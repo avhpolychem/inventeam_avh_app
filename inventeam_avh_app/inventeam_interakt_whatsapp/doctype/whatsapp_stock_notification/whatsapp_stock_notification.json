@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-10-04 11:41:10.735094",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date_time",
+  "template_name",
+  "data_query",
+  "filters_section",
+  "contact_name",
+  "column_break_pssea",
+  "mobile_no",
+  "message_count"
+ ],
+ "fields": [
+  {
+   "default": "Now",
+   "fieldname": "posting_date_time",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Date Time",
+   "read_only": 1
+  },
+  {
+   "default": "browse_catalog_on_whatsapp",
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "read_only": 1
+  },
+  {
+   "default": "SELECT CONCAT_WS(' ', IFNULL(first_name, ''), IFNULL(last_name,'')) AS ContactName, mobile_no FROM tabContact WHERE mobile_no IS NOT NULL AND mobile_no <> ''",
+   "fieldname": "data_query",
+   "fieldtype": "Small Text",
+   "label": "Data Query",
+   "read_only": 1
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "contact_name",
+   "fieldtype": "Link",
+   "label": "Contact Name",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "column_break_pssea",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile No"
+  },
+  {
+   "fieldname": "message_count",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Message Count",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-10-04 13:33:56.121035",
+ "modified_by": "Administrator",
+ "module": "Inventeam Interakt Whatsapp",
+ "name": "Whatsapp Stock Notification",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
