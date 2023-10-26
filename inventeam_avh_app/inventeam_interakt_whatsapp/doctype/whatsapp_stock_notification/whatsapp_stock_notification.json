@@ -9,11 +9,10 @@
  "field_order": [
   "posting_date_time",
   "template_name",
-  "data_query",
   "filters_section",
-  "contact_name",
+  "group",
   "column_break_pssea",
-  "mobile_no",
+  "sub_group",
   "message_count"
  ],
  "fields": [
@@ -26,17 +25,10 @@
    "read_only": 1
   },
   {
-   "default": "browse_catalog_on_whatsapp",
+   "default": "stock_notification",
    "fieldname": "template_name",
    "fieldtype": "Data",
    "label": "Template Name",
-   "read_only": 1
-  },
-  {
-   "default": "SELECT CONCAT_WS(' ', IFNULL(first_name, ''), IFNULL(last_name,'')) AS ContactName, mobile_no FROM tabContact WHERE mobile_no IS NOT NULL AND mobile_no <> ''",
-   "fieldname": "data_query",
-   "fieldtype": "Small Text",
-   "label": "Data Query",
    "read_only": 1
   },
   {
@@ -45,19 +37,20 @@
    "label": "Filters"
   },
   {
-   "fieldname": "contact_name",
+   "fieldname": "group",
    "fieldtype": "Link",
-   "label": "Contact Name",
-   "options": "Contact"
+   "label": "Group",
+   "options": "Item Sub Group"
   },
   {
    "fieldname": "column_break_pssea",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "mobile_no",
-   "fieldtype": "Data",
-   "label": "Mobile No"
+   "fieldname": "sub_group",
+   "fieldtype": "Link",
+   "label": "Item Sub Group",
+   "options": "Item Sub Group"
   },
   {
    "fieldname": "message_count",
@@ -69,7 +62,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-10-04 13:33:56.121035",
+ "modified": "2023-10-26 17:52:03.253580",
  "modified_by": "Administrator",
  "module": "Inventeam Interakt Whatsapp",
  "name": "Whatsapp Stock Notification",

@@ -54,6 +54,7 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
         "message": str(data['template']),
         "to": data['phoneNumber'],
         "message_id": response['id'],
+        "message_id": "",
         "sent_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S")
     }).save(ignore_permissions=True)
 
@@ -113,7 +114,7 @@ def get_invoiced_contact(item):
 def get_subgroup_contact(item):
     data = []
     subgrp = frappe.db.get_value("Item",item,"sub_group") 
-    if subgrp:        
+    if subgrp:
         data = frappe.db.sql("""
             select
             cp.phone,
@@ -162,8 +163,8 @@ class WhatsappStockNotification(Document):
                     "whatsapp_number":contact.phone
                 })
             
-            subgroup_contact_list = get_subgroup_contact_v2(item.item_code)
-            for contact in contact_list:    
+            subgroup_contact_list = get_subgroup_contact(item.item_code)
+            for contact in subgroup_contact_list:    
                 contact_response.append({
                     "item_code":item.item_code,
                     "item_name":item.item_name,
@@ -176,91 +177,49 @@ class WhatsappStockNotification(Document):
                     "contact_name":contact.contact_name,
                     "whatsapp_number":contact.phone
                 })
-        
-        results = {}
-        for contact_item in contact_response:
-            contact_name = contact_item["contact_name"]
-            whatsapp_number = contact_item["whatsapp_number"]
-            warehouse = contact_item["warehouse"]
-            group = contact_item["group"]
-            sub_group = contact_item["sub_group"]
-            item_code = contact_item["item_code"]
-            item_name = contact_item["item_name"]
-            actual_qty = contact_item["actual_qty"]
-            reserved_qty = contact_item["reserved_qty"]
-            rem_qty = contact_item["rem_qty"]
-            
-            # Create the structure if it doesn't exist
-            if contact_name not in results:
-                results[contact_name] = {
-                    "whatsapp_number": whatsapp_number,
-                    "warehouse_stock": []
-                }
-
-            # Check if the warehouse exists in the results for the contact
-            warehouse_info = next(
-                (w for w in results[contact_name]["warehouse_stock"] if w["warehouse"] == warehouse), None
-            )
-
-            if not warehouse_info:
-                # Warehouse info doesn't exist, create it
-                warehouse_info = {
-                    "warehouse": warehouse,
-                    "subgroup_stock": []
-                }
-                results[contact_name]["warehouse_stock"].append(warehouse_info)
-
-            # Check if the subgroup exists in the warehouse info
-            subgroup_info = next(
-                (sg for sg in warehouse_info["subgroup_stock"] if sg["group"] == group and sg["sub_group"] == sub_group),
-                None
-            )
-
-            if not subgroup_info:
-                # Subgroup info doesn't exist, create it
-                subgroup_info = {
-                    "group": group,
-                    "sub_group": sub_group,
-                    "item_stock": []
-                }
-                warehouse_info["subgroup_stock"].append(subgroup_info)
-
-            # Create the item details
-            item_detail = {
-                "item_code": item_code,
-                "item_name": item_name,
-                "actual_qty": actual_qty,
-                "reserved_qty": reserved_qty,
-                "rem_qty": rem_qty
-            }
-
-            # Add the item details to the subgroup_stock list
-            subgroup_info["item_stock"].append(item_detail)
-
-            
-        #sql = self.data_query  # Assuming self.query is a valid SQL query
-        #if self.mobile_no:
-        #    sql = f"{sql} and mobile_no like '{self.mobile_no}%'"
-            
-        #results = frappe.db.sql(sql, as_dict=True)
-        template_name = self.template_name
-        i = 0
-        for result in results:
-            whatsapp_number = result["whatsapp_number"]
-            contact_name = result["contact_name"]
-            text_message=""
-            
-            for warehouse_data in data["warehouse_stock"]:
-                text_message = f"\n *{warehouse_data["warehouse"]}* \n"
                 
-                for subgroup_data in warehouse_data["subgroup_stock"]:
-                    text_message += f"\n *{subgroup_data["sub_group"]}* \n"
-                    
-                    for item_data in subgroup_data["item_stock"]:
-                        text_message += f"{item_data["item_code"]} \n"
-            
-            i += 1
-            enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+        text_message=""
+        i = 0
+        template_name = self.template_name
         
+        sorted_contact_response = sorted(contact_response, key=lambda x: (x["contact_name"], x["whatsapp_number"], x["warehouse"], x["sub_group"]))
+        
+        distinct_whatsapp_number = set()
+        distinct_warehouse = set()
+        distinct_subgroup = set()
+        for index, row in enumerate(sorted_contact_response):
+            whatsapp_number = row["whatsapp_number"]
+            if whatsapp_number not in distinct_whatsapp_number:
+                distinct_whatsapp_number.add(whatsapp_number)
+                i += 1
+                text_message=""
+                distinct_warehouse = set()
+                distinct_subgroup = set()
+            else:
+                contact_name = row["contact_name"]
+                warehouse = row["warehouse"]
+                sub_group = row["sub_group"]
+                group = row["group"]
+                item_code = row["item_code"]
+                item_name = row["item_name"]
+                actual_qty = row["actual_qty"]
+                reserved_qty = row["reserved_qty"]
+                rem_qty = row["rem_qty"]
+                
+                if warehouse not in distinct_warehouse:
+                    text_message += f"*{warehouse}*"
+                    
+                if sub_group not in distinct_subgroup:
+                    text_message += f"*{sub_group}*"
+                    
+                text_message += f"*{item_code}*"
+
+                if index < len(sorted_contact_response) - 1:
+                    next_row = sorted_contact_response[index + 1]
+                    if next_row['whatsapp_number'] not in distinct_whatsapp_number:
+                        enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                else:
+                    enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                
         self.message_count = i
         self.save()
