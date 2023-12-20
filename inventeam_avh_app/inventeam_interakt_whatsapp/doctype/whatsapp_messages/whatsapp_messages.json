@@ -8,10 +8,11 @@
  "engine": "InnoDB",
  "field_order": [
   "label",
-  "message",
   "to",
   "message_id",
-  "sent_time"
+  "sent_time",
+  "request_data",
+  "response_data"
  ],
  "fields": [
   {
@@ -19,12 +20,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Label",
-   "read_only": 1
-  },
-  {
-   "fieldname": "message",
-   "fieldtype": "Small Text",
-   "label": "Message",
    "read_only": 1
   },
   {
@@ -46,11 +41,23 @@
    "in_list_view": 1,
    "label": "Sent Time",
    "read_only": 1
+  },
+  {
+   "fieldname": "request_data",
+   "fieldtype": "JSON",
+   "label": "Request Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "response_data",
+   "fieldtype": "JSON",
+   "label": "Response Data",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-10-03 15:07:47.201424",
+ "modified": "2023-11-10 17:27:13.998832",
  "modified_by": "Administrator",
  "module": "Inventeam Interakt Whatsapp",
  "name": "Whatsapp Messages",

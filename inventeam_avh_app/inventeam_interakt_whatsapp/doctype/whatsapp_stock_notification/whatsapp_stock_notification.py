@@ -35,9 +35,13 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
                 "name": template_name,
                 "languageCode": "en",
                 "bodyValues": [
-                    contact_name,
+                    contact_name + " ji",
                     text_message,
-                ]
+                ],
+                "fileName": "AVH_Logo.jpg",
+                "headerValues": [
+                    "https://avh.inventeam.in/files/AVHPL_Logo.jpg"
+                ],
             }
         }
         
@@ -59,6 +63,7 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
     }).save(ignore_permissions=True)
 
 
+
 def get_available_items(group=None, sub_group=None):
     min_qty = frappe.db.get_single_value('Custom Stock Setting', 'min_qty')
     cond = ""
@@ -70,11 +75,11 @@ def get_available_items(group=None, sub_group=None):
         cond = cond + " and it.sub_group='" + sub_group + "'"
         
     available_item = frappe.db.sql("""
-    select bn.item_code,it.item_name,bn.warehouse,bn.actual_qty,bn.reserved_qty, (bn.actual_qty - bn.reserved_qty) as rem_qty,it.group,it.sub_group from `tabBin` bn inner join `tabItem` it on it.name = bn.item_code where bn.actual_qty > 0 {cond}
+    select bn.item_code,it.item_name,bn.warehouse,bn.actual_qty,bn.reserved_qty, (bn.actual_qty - bn.reserved_qty) as rem_qty,it.group,it.sub_group from `tabBin` bn inner join `tabItem` it on it.name = bn.item_code where bn.actual_qty > 0  AND bn.warehouse NOT LIKE ('%In Transit%') {cond}
     """.format(cond=cond),as_dict=1)
     return available_item
 
-def get_invoiced_contact(item):
+def get_invoiced_contact_whatsapp(item):
     data = []
     subgrp = frappe.db.get_value("Item",item,"sub_group")
     if subgrp:
@@ -111,7 +116,7 @@ def get_invoiced_contact(item):
             return data
     return data
 
-def get_subgroup_contact(item):
+def get_subgroup_contact_whatsapp(item):
     data = []
     subgrp = frappe.db.get_value("Item",item,"sub_group") 
     if subgrp:
@@ -130,7 +135,8 @@ def get_subgroup_contact(item):
             cp.is_whatsapp_no_ak = 1
             """,(subgrp),as_dict = True)
     return data
-    
+
+
 class WhatsappStockNotification(Document):
     def after_insert(self):
         # Use 4 spaces for indentation
@@ -148,7 +154,7 @@ class WhatsappStockNotification(Document):
         
         contact_response = []
         for item in available_items:
-            invoiced_contact_list = get_invoiced_contact(item.item_code)
+            invoiced_contact_list = get_invoiced_contact_whatsapp(item.item_code)
             for contact in invoiced_contact_list:
                 contact_response.append({
                     "item_code": item.item_code,
@@ -163,7 +169,7 @@ class WhatsappStockNotification(Document):
                     "whatsapp_number":contact.phone
                 })
             
-            subgroup_contact_list = get_subgroup_contact(item.item_code)
+            subgroup_contact_list = get_subgroup_contact_whatsapp(item.item_code)
             for contact in subgroup_contact_list:    
                 contact_response.append({
                     "item_code":item.item_code,
@@ -207,12 +213,15 @@ class WhatsappStockNotification(Document):
                 rem_qty = row["rem_qty"]
                 
                 if warehouse not in distinct_warehouse:
-                    text_message += f"*{warehouse}*"
+                    distinct_warehouse.add(warehouse)
+                    distinct_subgroup = set()
+                    text_message += f"\\n*_{warehouse}_*\\n"
                     
                 if sub_group not in distinct_subgroup:
-                    text_message += f"*{sub_group}*"
+                    distinct_subgroup.add(sub_group)
+                    text_message += f"\\n*{sub_group}*\\n"
                     
-                text_message += f"*{item_code}*"
+                text_message += f"{item_code}\\n"
 
                 if index < len(sorted_contact_response) - 1:
                     next_row = sorted_contact_response[index + 1]

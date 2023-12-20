@@ -56,14 +56,15 @@ def send_message(doc_type, doc_name):
             ],
             "fileName": filename,
             "bodyValues": [
-                doc_data[wa_setting.contact_name_field],
-                "AVH",
+                frappe.utils.formatdate(doc_data["posting_date"]),
+                doc_data["name"],
+                frappe.utils.fmt_money(doc_data["rounded_total"],currency="INR"),
             ]
         }
     }
     
     response = make_post_request(
-        f"{wa_setting.api_url}",
+        wa_setting.api_url,
         headers=headers,
         data=json.dumps(data)
     )
@@ -71,14 +72,15 @@ def send_message(doc_type, doc_name):
     frappe.get_doc({
         "doctype": "Whatsapp Messages",
         "label": doc_data["name"],
-        "message": str(data['template']),
+        "request_data": data,
+        "response_data": response,
         "to": data['phoneNumber'],
         "message_id": response['id'],
         "sent_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S")
     }).save(ignore_permissions=True)
 
     # Return a success message
-    return response
+    return "1"
         
     
 @frappe.whitelist()
