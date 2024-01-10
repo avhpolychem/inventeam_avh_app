@@ -129,7 +129,15 @@ app_include_js = "/assets/inventeam_avh_app/js/inventeam_avh_app.js"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
+    #"cron": {
+	#	"* * * * *": [
+	#		"inventeam_avh_app.tasks.cron"
+	#	]
+	#},
+    #"weekly": [
+	#	"inventeam_avh_app.tasks.weekly"
+	#]
 #	"all": [
 #		"inventeam_avh_app.tasks.all"
 #	],
@@ -145,7 +153,7 @@ app_include_js = "/assets/inventeam_avh_app/js/inventeam_avh_app.js"
 #	"monthly": [
 #		"inventeam_avh_app.tasks.monthly"
 #	],
-# }
+ }
 
 # Testing
 # -------
