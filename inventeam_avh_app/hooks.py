@@ -130,11 +130,11 @@ app_include_js = "/assets/inventeam_avh_app/js/inventeam_avh_app.js"
 # ---------------
 
 scheduler_events = {
-    #"cron": {
-	#	"* * * * *": [
-	#		"inventeam_avh_app.tasks.cron"
-	#	]
-	#},
+    "cron": {
+		"* * * * *": [
+			"inventeam_avh_app.tasks.send_whatsapp_stock_notification",
+		]
+	}
     #"weekly": [
 	#	"inventeam_avh_app.tasks.weekly"
 	#]

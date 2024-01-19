@@ -100,6 +100,30 @@ def cron():
             subject= "Overdue Payment Pending",
             message= message_body
         )
-    
+
+def send_whatsapp_stock_notification():
+    query = """SELECT * FROM `tabWhatsapp Messages API Data`
+                WHERE api_trigger = 0
+                LIMIT 100"""
+            
+    sql_data = frappe.db.sql(query, as_dict=True)
+
+    for row in sql_data:
+        frappe.enqueue(
+            'inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.send_whatsapp_message',
+            queue='short',
+            job_name='Stock WhatsApp Notification',
+            api_key= row.api_key,
+            api_url= row.api_url,
+            template_name= row.template_name,
+            whatsapp_number= row.whatsapp_number,
+            contact_name= row.contact_name,
+            text_message= row.text_message
+        )
+        
+        doc = frappe.get_doc("Whatsapp Messages API Data", row.name)
+        doc.api_trigger = 1
+        doc.save()
+
 def weekly():
     pass

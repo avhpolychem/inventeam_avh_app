@@ -4,18 +4,21 @@ from frappe.integrations.utils import make_post_request
 from datetime import datetime
 from frappe.model.document import Document
 
-def enqueue_send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, contact_name, text_message):
-    frappe.enqueue(
-        'inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.send_whatsapp_message',
-        queue='short',
-        job_name='Stock WhatsApp Notification',
-        api_key= api_key,
-        api_url= api_url,
-        template_name= template_name,
-        whatsapp_number= whatsapp_number,
-        contact_name= contact_name,
-        text_message= text_message
-    )
+def save_whatsapp_api_data(api_key, api_url, template_name, whatsapp_number, contact_name, text_message):
+    current_datetime = datetime.now()
+    
+    frappe.get_doc({
+        "doctype": "Whatsapp Messages API Data",
+        "api_key": api_key,
+        "api_url": api_url,
+        "template_name": template_name,
+        "whatsapp_number": whatsapp_number,
+        "contact_name": contact_name,
+        "text_message": text_message,
+        "api_trigger": 0,
+        "api_data_date": current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    }).save(ignore_permissions=True)
+
     
 @frappe.whitelist()
 def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, contact_name, text_message):
@@ -44,21 +47,20 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
                 ],
             }
         }
-        
+    
     response = make_post_request(
         f"{api_url}",
         headers=headers,
         data=json.dumps(data)
     )
 
-    # Create a WhatsApp Message document
     frappe.get_doc({
         "doctype": "Whatsapp Messages",
-        "label": "Notification",
-        "message": str(data['template']),
+        "label": "Stock Notification",
+        "request_data": data,
+        "response_data": response,
         "to": data['phoneNumber'],
         "message_id": response['id'],
-        "message_id": "",
         "sent_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S")
     }).save(ignore_permissions=True)
 
@@ -226,9 +228,11 @@ class WhatsappStockNotification(Document):
                 if index < len(sorted_contact_response) - 1:
                     next_row = sorted_contact_response[index + 1]
                     if next_row['whatsapp_number'] not in distinct_whatsapp_number:
-                        enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                        save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                        #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                 else:
-                    enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                    save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                    #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                 
         self.message_count = i
         self.save()

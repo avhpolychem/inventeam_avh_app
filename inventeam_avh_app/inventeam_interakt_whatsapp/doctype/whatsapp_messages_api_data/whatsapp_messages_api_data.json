@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-01-19 14:41:50.304702",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "api_data_date",
+  "api_key",
+  "api_url",
+  "api_trigger",
+  "template_name",
+  "whatsapp_number",
+  "contact_name",
+  "text_message"
+ ],
+ "fields": [
+  {
+   "default": "Now",
+   "fieldname": "api_data_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "API Data Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "api_url",
+   "fieldtype": "Data",
+   "label": "API URL",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "api_trigger",
+   "fieldtype": "Check",
+   "label": "API Trigger",
+   "read_only": 1
+  },
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "whatsapp_number",
+   "fieldtype": "Data",
+   "label": "Whatsapp Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_name",
+   "fieldtype": "Data",
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "text_message",
+   "fieldtype": "Small Text",
+   "label": "Text Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Data",
+   "label": "API Key",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-19 19:13:25.865988",
+ "modified_by": "Administrator",
+ "module": "Inventeam Interakt Whatsapp",
+ "name": "Whatsapp Messages API Data",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
