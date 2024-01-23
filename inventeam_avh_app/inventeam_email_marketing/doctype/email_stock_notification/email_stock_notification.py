@@ -9,7 +9,7 @@ from datetime import datetime
 from frappe.model.document import Document
 
 def enqueue_send_email(recipients, subject, message):
-    message_body = f"Dear Sir/Madam, <br><br> {message} <br><br> Regards,<br> <b>AVH Polychem Pvt. Ltd.</b>"
+    message_body = f"Dear Sir/Madam, <br>{message} <br> Regards,<br> <b>AVH Polychem Pvt. Ltd.</b>"
     
     frappe.enqueue(
         method=frappe.sendmail,
@@ -167,19 +167,45 @@ class EmailStockNotification(Document):
                 if warehouse not in distinct_warehouse:
                     distinct_warehouse.add(warehouse)
                     distinct_subgroup = set()
-                    text_message += f"<br><p><b>{warehouse}</b></p>"
+                    if len(text_message) > 0:
+                        text_message += '</tbody>'
+                        text_message += "</table>"
+                        text_message += "<br>"
                     
+                    text_message += '<table border="1" cellpadding="1" cellspacing="1" style="color: rgb(34, 34, 34); font-family: Arial, Helvetica, sans-serif; font-size: small; background-color: rgb(255, 255, 255); width: 500px;">'
+                    text_message += '<thead>'
+                    text_message += '<tr>'
+                    text_message += f'<th colspan="2" style="background-color: rgb(204, 204, 204);">{warehouse}</th>'
+                    text_message += '</tr>'
+                    text_message += '<tr>'
+                    text_message += '<th style="width: 50%;">Category</th>'
+                    text_message += '<th style="width: 50%;">Products</th>'
+                    text_message += '</tr>'
+                    text_message += '</thead>'
+                    text_message += '<tbody>'
+
                 if sub_group not in distinct_subgroup:
                     distinct_subgroup.add(sub_group)
-                    text_message += f"<br><p><b>{sub_group}</b></p>"
-                    
-                text_message += f"<p>{item_code}</p>"
+                    text_message += '<tr>'
+                    text_message += f'<td style="margin: 0px;"><strong>{sub_group}</strong></td>'
+                    #text_message += f"<br><p><b>{sub_group}</b></p>"
+                else:
+                    text_message += '<tr>'
+                    text_message += f'<td style="margin: 0px;"></td>'
+
+                text_message += f'<td style="margin: 0px;">{item_code}</td>'
+                text_message += '</tr>'
+                #text_message += f"<p>{item_code}</p>"
 
                 if index < len(sorted_contact_response) - 1:
                     next_row = sorted_contact_response[index + 1]
                     if next_row['email_id'] not in distinct_email_id:
+                        text_message += '</tbody>'
+                        text_message += "</table>"
                         enqueue_send_email(email_id, 'AVH Stock', text_message)
                 else:
+                    text_message += '</tbody>'
+                    text_message += "</table>"
                     enqueue_send_email(email_id, 'AVH Stock', text_message)
                 
         self.message_count = i
