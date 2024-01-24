@@ -1,4 +1,7 @@
 import frappe
+import json
+from frappe.integrations.utils import make_post_request
+from datetime import datetime
 
 def cron():
     query = """SELECT customer,contact_email,posting_date,NAME AS invoice_no,outstanding_amount,due_date,DATEDIFF(CURDATE(),due_date) AS Overdue_Days 
@@ -109,17 +112,18 @@ def send_whatsapp_stock_notification():
     sql_data = frappe.db.sql(query, as_dict=True)
 
     for row in sql_data:
-        frappe.enqueue(
-            'inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.send_whatsapp_message',
-            queue='short',
-            job_name='Stock WhatsApp Notification',
-            api_key= row.api_key,
-            api_url= row.api_url,
-            template_name= row.template_name,
-            whatsapp_number= row.whatsapp_number,
-            contact_name= row.contact_name,
-            text_message= row.text_message
-        )
+        send_whatsapp_message(row.api_key,row.api_url,row.template_name,row.whatsapp_number,row.contact_name,row.text_message)
+        #frappe.enqueue(
+        #    'inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.send_whatsapp_message',
+        #    queue='short',
+        #    job_name='Stock WhatsApp Notification',
+        #    api_key= row.api_key,
+        #    api_url= row.api_url,
+        #    template_name= row.template_name,
+        #    whatsapp_number= row.whatsapp_number,
+        #    contact_name= row.contact_name,
+        #    text_message= row.text_message
+        #)
         
         doc = frappe.get_doc("Whatsapp Messages API Data", row.name)
         doc.api_trigger = 1
@@ -127,3 +131,47 @@ def send_whatsapp_stock_notification():
 
 def weekly():
     pass
+
+
+def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, contact_name, text_message):
+    # Use 4 spaces for indentation
+    current_datetime = datetime.now()
+    headers = {
+            "authorization": f"Basic {api_key}",
+            "content-type": "application/json"
+        }
+        
+    data = {
+            "countryCode": "+91",
+            "phoneNumber": whatsapp_number,
+            "callbackData": "some text here",
+            "type": "Template",
+            "template": {
+                "name": template_name,
+                "languageCode": "en",
+                "bodyValues": [
+                    contact_name + " ji",
+                    text_message,
+                ],
+                "fileName": "AVH_Logo.jpg",
+                "headerValues": [
+                    "https://avh.inventeam.in/files/AVHPL_Logo.jpg"
+                ],
+            }
+        }
+    
+    response = make_post_request(
+        f"{api_url}",
+        headers=headers,
+        data=json.dumps(data)
+    )
+
+    frappe.get_doc({
+        "doctype": "Whatsapp Messages",
+        "label": "Stock Notification",
+        "request_data": data,
+        "response_data": response,
+        "to": data['phoneNumber'],
+        "message_id": response['id'],
+        "sent_time": current_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    }).save(ignore_permissions=True)
