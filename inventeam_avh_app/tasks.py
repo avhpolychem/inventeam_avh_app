@@ -107,7 +107,7 @@ def cron():
 def send_whatsapp_stock_notification():
     query = """SELECT * FROM `tabWhatsapp Messages API Data`
                 WHERE api_trigger = 0
-                LIMIT 1"""
+                LIMIT 10"""
             
     sql_data = frappe.db.sql(query, as_dict=True)
 
