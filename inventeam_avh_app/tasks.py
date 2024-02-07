@@ -112,22 +112,22 @@ def send_whatsapp_stock_notification():
     sql_data = frappe.db.sql(query, as_dict=True)
 
     for row in sql_data:
-        send_whatsapp_message(row.api_key,row.api_url,row.template_name,row.whatsapp_number,row.contact_name,row.text_message)
-        #frappe.enqueue(
-        #    'inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.send_whatsapp_message',
-        #    queue='short',
-        #    job_name='Stock WhatsApp Notification',
-        #    api_key= row.api_key,
-        #    api_url= row.api_url,
-        #    template_name= row.template_name,
-        #    whatsapp_number= row.whatsapp_number,
-        #    contact_name= row.contact_name,
-        #    text_message= row.text_message
-        #)
+        #send_whatsapp_message(row.api_key,row.api_url,row.template_name,row.whatsapp_number,row.contact_name,row.text_message)
+        frappe.enqueue(
+            'inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.send_whatsapp_message',
+            queue='short',
+            job_name='Stock WhatsApp Notification',
+            api_key= row.api_key,
+            api_url= row.api_url,
+            template_name= row.template_name,
+            whatsapp_number= row.whatsapp_number,
+           contact_name= row.contact_name,
+            text_message= row.text_message
+        )
         
         doc = frappe.get_doc("Whatsapp Messages API Data", row.name)
         doc.api_trigger = 1
-        doc.save()
+        doc.save(ignore_permissions=True)
 
 def weekly():
     pass

@@ -199,7 +199,6 @@ class WhatsappStockNotification(Document):
             whatsapp_number = row["whatsapp_number"]
             if whatsapp_number not in distinct_whatsapp_number:
                 distinct_whatsapp_number.add(whatsapp_number)
-                i += 1
                 text_message=""
                 distinct_warehouse = set()
                 distinct_subgroup = set()
@@ -228,9 +227,11 @@ class WhatsappStockNotification(Document):
                 if index < len(sorted_contact_response) - 1:
                     next_row = sorted_contact_response[index + 1]
                     if next_row['whatsapp_number'] not in distinct_whatsapp_number:
+                        i += 1
                         save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                         #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                 else:
+                    i += 1
                     save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                     #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                 
