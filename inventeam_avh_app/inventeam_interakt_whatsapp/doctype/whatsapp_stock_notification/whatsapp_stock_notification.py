@@ -195,6 +195,7 @@ class WhatsappStockNotification(Document):
         distinct_whatsapp_number = set()
         distinct_warehouse = set()
         distinct_subgroup = set()
+        distinct_item = set()
         for index, row in enumerate(sorted_contact_response):
             whatsapp_number = row["whatsapp_number"]
             if whatsapp_number not in distinct_whatsapp_number:
@@ -202,6 +203,7 @@ class WhatsappStockNotification(Document):
                 text_message=""
                 distinct_warehouse = set()
                 distinct_subgroup = set()
+                distinct_item = set()
             else:
                 contact_name = row["contact_name"]
                 warehouse = row["warehouse"]
@@ -221,8 +223,12 @@ class WhatsappStockNotification(Document):
                 if sub_group not in distinct_subgroup:
                     distinct_subgroup.add(sub_group)
                     text_message += f"\\n*{sub_group}*\\n"
-                    
-                text_message += f"{item_code}\\n"
+
+                if item_code not in distinct_item:
+                    distinct_item.add(item_code)
+                    text_message += f"{item_code}\\n"
+
+                #text_message += f"{item_code}\\n"
 
                 if index < len(sorted_contact_response) - 1:
                     next_row = sorted_contact_response[index + 1]
