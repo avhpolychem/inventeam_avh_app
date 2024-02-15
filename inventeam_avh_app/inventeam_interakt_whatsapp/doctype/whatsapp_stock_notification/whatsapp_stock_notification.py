@@ -218,6 +218,7 @@ class WhatsappStockNotification(Document):
                 if warehouse not in distinct_warehouse:
                     distinct_warehouse.add(warehouse)
                     distinct_subgroup = set()
+                    distinct_item = set()
                     text_message += f"\\n*_{warehouse}_*\\n"
                     
                 if sub_group not in distinct_subgroup:
