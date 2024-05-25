@@ -8,8 +8,15 @@ from frappe.integrations.utils import make_post_request
 from datetime import datetime
 from frappe.model.document import Document
 
-def enqueue_send_email(recipients, subject, message):
-    message_body = f"Dear Sir/Madam, <br>{message} <br> Regards,<br> <b>AVH Polychem Pvt. Ltd.</b>"
+def enqueue_send_email(recipients, contact_name, subject, message):
+    message_body = f"""Dear {contact_name} ji, 
+                    <p>We are pleased to offer the following grades.</p>
+                    <br>{message} <br> 
+                    <p>If you require any other grade not mentioned above, we shall be able to offer you the same subject to availability.</p>
+                    <p>Kindly contact respective sales person for product inquiry.</p>
+                    Regards<br> 
+                    <b>AVH Polychem Private Limited</b><br>
+                    Phone: +91 2246002838 | Web: <a href="www.avh.co.in">avh.co.in</a> | Email: <a href="mailto:sales@avh.co.in" target="_blank">sales@avh.co.in</a>"""
     
     frappe.enqueue(
         method=frappe.sendmail,
@@ -17,7 +24,7 @@ def enqueue_send_email(recipients, subject, message):
         job_name='Stock Email Notification',
         recipients= recipients,
         subject= subject,
-        message= message
+        message= message_body
     )
     #frappe.enqueue(method=frappe.sendmail, queue='short', timeout=300, async=True, email_args)
 
@@ -95,10 +102,6 @@ def get_subgroup_contact_email(item):
     
 class EmailStockNotification(Document):
     def after_insert(self):
-        wa_setting = frappe.get_doc("Whatsapp Setting", "Whatsapp Setting")
-        api_key = wa_setting.api_key
-        api_url = wa_setting.api_url
-        
         f_sub_group = None
         
         if self.sub_group:
@@ -145,6 +148,7 @@ class EmailStockNotification(Document):
         distinct_email_id = set()
         distinct_warehouse = set()
         distinct_subgroup = set()
+        distinct_item = set()
         for index, row in enumerate(sorted_contact_response):
             email_id = row["email_id"]
             if email_id not in distinct_email_id:
@@ -153,6 +157,7 @@ class EmailStockNotification(Document):
                 text_message = ""
                 distinct_warehouse = set()
                 distinct_subgroup = set()
+                distinct_item = set()
             else:
                 contact_name = row["contact_name"]
                 warehouse = row["warehouse"]
@@ -167,7 +172,10 @@ class EmailStockNotification(Document):
                 if warehouse not in distinct_warehouse:
                     distinct_warehouse.add(warehouse)
                     distinct_subgroup = set()
+                    distinct_item = set()
                     if len(text_message) > 0:
+                        text_message += '</td>'
+                        text_message += '</tr>'
                         text_message += '</tbody>'
                         text_message += "</table>"
                         text_message += "<br>"
@@ -185,28 +193,33 @@ class EmailStockNotification(Document):
                     text_message += '<tbody>'
 
                 if sub_group not in distinct_subgroup:
-                    distinct_subgroup.add(sub_group)
-                    text_message += '<tr>'
-                    text_message += f'<td style="margin: 0px;"><strong>{sub_group}</strong></td>'
-                    #text_message += f"<br><p><b>{sub_group}</b></p>"
-                else:
-                    text_message += '<tr>'
-                    text_message += f'<td style="margin: 0px;"></td>'
+                    if len(distinct_subgroup) == 0:
+                        text_message += '</td>'
+                        text_message += '</tr>'
 
-                text_message += f'<td style="margin: 0px;">{item_code}</td>'
-                text_message += '</tr>'
-                #text_message += f"<p>{item_code}</p>"
+                    distinct_subgroup.add(sub_group)
+                    distinct_item.add(item_code)
+                    
+                    text_message += '<tr>'
+                    text_message += f'<td style="margin: 0px;vertical-align: top;"><strong>{sub_group}</strong></td>'
+                    text_message += f'<td style="margin: 0px;vertical-align: top;">{item_code}'
+                elif item_code not in distinct_item:
+                    distinct_item.add(item_code)
+                    text_message += f'<br/>{item_code}'
+
 
                 if index < len(sorted_contact_response) - 1:
                     next_row = sorted_contact_response[index + 1]
                     if next_row['email_id'] not in distinct_email_id:
+                        text_message += '</td>'
+                        text_message += '</tr>'
                         text_message += '</tbody>'
                         text_message += "</table>"
-                        enqueue_send_email(email_id, 'AVH Stock', text_message)
+                        enqueue_send_email(email_id, contact_name, 'AVH Polychem Polymers offer', text_message)
                 else:
                     text_message += '</tbody>'
                     text_message += "</table>"
-                    enqueue_send_email(email_id, 'AVH Stock', text_message)
+                    enqueue_send_email(email_id, contact_name, 'AVH Polychem Polymers offer', text_message)
                 
         self.message_count = i
         self.save()
