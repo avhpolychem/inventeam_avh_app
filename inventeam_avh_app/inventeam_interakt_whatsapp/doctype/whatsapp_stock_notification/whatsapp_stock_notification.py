@@ -43,7 +43,7 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
                 ],
                 "fileName": "AVH_Logo.jpg",
                 "headerValues": [
-                    "https://avh.inventeam.in/files/AVHPL_Logo.jpg"
+                    "https://avhpolychem.frappe.cloud/files/AVHPL_Logo.jpg"
                 ],
             }
         }
