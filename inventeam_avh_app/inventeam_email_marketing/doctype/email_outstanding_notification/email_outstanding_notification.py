@@ -16,7 +16,7 @@ class EmailOutstandingNotification(Document):
 		duedate_next10days = date.today() + timedelta(days=10)
 
 		distinct_email_id = set()
-		
+
 		message_body_head = f"""<table style="font-family:Calibri;width:627px;border-collapse:collapse;color:rgb(96,96,96);border:thin solid rgb(229,228,226);background-color:rgb(144,144,144);font-size:0.75em">
                             <thead>
                                 <tr>
@@ -39,7 +39,7 @@ class EmailOutstandingNotification(Document):
                                  <th bgcolor="#909090" align="center" style="color:rgb(239,239,239);padding:0.5em;border:thin solid rgb(229,228,226)">Overdue Days</th>
                               </tr>
                             </thead>"""
-    
+
 		message_body_footer = """<tr bgcolor="#efefef" style="background-color:rgb(250,250,250)">
 									<td colspan="8" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)"><br><br><b>For making the payment thru RTGS/ NEFT to AVH Polychem Pvt. Ltd., our bank details are mentioned below.</b></td>
 								</tr>
@@ -69,25 +69,25 @@ class EmailOutstandingNotification(Document):
 								</tr>
 							</tfoot>
 							</table>"""
-		
+
 		message_body_row = """<tbody>"""
 		recipients = ""
 
 		query = f"""SELECT customer,contact_person,`tabContact Email`.email_id,posting_date,`tabSales Invoice`.NAME AS invoice_no,
-					net_total,outstanding_amount,due_date,DATEDIFF(CURDATE(),due_date) AS Overdue_Days,`tabSales Invoice`.payment_terms_template
+					rounded_total,outstanding_amount,due_date,DATEDIFF(CURDATE(),due_date) AS Overdue_Days,`tabSales Invoice`.payment_terms_template
 					FROM `tabSales Invoice`
-					Join `tabContact Email` on `tabContact Email`.parent = `tabSales Invoice`.contact_person 
+					Join `tabContact Email` on `tabContact Email`.parent = `tabSales Invoice`.contact_person
 					AND `tabContact Email`.custom_is_outstanding_notification_email = 1
 					WHERE outstanding_amount > 0 AND DATEDIFF(CURDATE(),due_date) > 0 """
-					
-		
+
+
 		if customer:
 			query = query + """ And `tabSales Invoice`.customer={customer} """
 
 		if contact:
 			query = query + """ And `tabSales Invoice`.contact_person={contact} """
 
-		query = query + """Order BY customer,contact_email,due_date"""
+		query = query + """Order BY customer,email_id,due_date"""
 
 		sql_data = frappe.db.sql(query, as_dict=True)
 		i = 0
@@ -113,9 +113,9 @@ class EmailOutstandingNotification(Document):
 					)
 				recipients = email_id
 				cuatomername = row.customer
-				message_body_row = """<tbody>"""    
-				
-				
+				message_body_row = """<tbody>"""
+
+
 			if row.Overdue_Days < 0:
 				already_due_amount = row.outstanding_amount
 			else:
@@ -126,13 +126,13 @@ class EmailOutstandingNotification(Document):
 													<td align="center" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{row.posting_date.strftime("%d-%m-%Y")}</td>
 													<td align="center" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{row.payment_terms_template}</td>
 													<td align="center" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{row.due_date.strftime("%d-%m-%Y")}</td>
-													<td align="right" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{frappe.utils.fmt_money(row.net_total,currency='INR')}</td>
+													<td align="right" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{frappe.utils.fmt_money(row.rounded_total,currency='INR')}</td>
 													<td align="right" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{frappe.utils.fmt_money(outstanding_amount,currency='INR')}</td>
 													<td align="right" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{frappe.utils.fmt_money(already_due_amount,currency='INR')}</td>
 													<td align="center" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">{row.Overdue_Days}</td>
 													</tr>"""
-				
-			
+
+
 		if message_body_row != "<tbody>":
 			message_body_row = message_body_row + """</tbody>"""
 			message_body = message_body_head + message_body_row + message_body_footer
