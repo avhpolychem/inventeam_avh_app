@@ -78,7 +78,7 @@ class EmailOutstandingNotification(Document):
 					FROM `tabSales Invoice`
 					Join `tabContact Email` on `tabContact Email`.parent = `tabSales Invoice`.contact_person
 					AND `tabContact Email`.custom_is_outstanding_notification_email = 1
-					WHERE outstanding_amount > 0 AND DATEDIFF(CURDATE(),due_date) > 0 """
+					WHERE `tabSales Invoice`.docstatus = 1 and outstanding_amount > 0 AND DATEDIFF(CURDATE(),due_date) > 0 """
 
 
 		if customer:
