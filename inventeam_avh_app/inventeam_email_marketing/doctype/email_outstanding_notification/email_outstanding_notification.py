@@ -82,10 +82,10 @@ class EmailOutstandingNotification(Document):
 
 
 		if customer:
-			query = query + """ And `tabSales Invoice`.customer={customer} """
+			query = query + """ And `tabSales Invoice`.customer='{customer}' """
 
 		if contact:
-			query = query + """ And `tabSales Invoice`.contact_person={contact} """
+			query = query + """ And `tabSales Invoice`.contact_person='{contact}' """
 
 		query = query + """Order BY customer,email_id,due_date"""
 
