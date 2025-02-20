@@ -45,7 +45,7 @@ class EmailOutstandingNotification(Document):
 								</tr>
 								<tr bgcolor="#fafafa" style="background-color:rgb(239,239,239)">
 									<td colspan="3" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)"><b>Bank Name:</b></td>
-									<td colspan="5" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">HDFC Bank Ltd</td>
+									<td colspan="5" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">HSBC Bank Ltd</td>
 								</tr>
 								<tr bgcolor="#efefef" style="background-color:rgb(250,250,250)">
 									<td colspan="3" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)"><b>Beneficiary Name:</b></td>
@@ -53,11 +53,11 @@ class EmailOutstandingNotification(Document):
 								</tr>
 								<tr bgcolor="#fafafa" style="border-bottom:1px solid rgb(64,64,64);background-color:rgb(239,239,239)">
 									<td colspan="3" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)"><b>Account No:</b></td>
-									<td colspan="5" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">57500000549220</td>
+									<td colspan="5" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">006330096001</td>
 								</tr>
 								<tr bgcolor="#efefef" style="border-bottom:1px solid rgb(64,64,64);background-color:rgb(250,250,250)">
 									<td colspan="3" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)"><b>IFSC Code:</b></td>
-									<td colspan="5" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">HDFC0004685</td>
+									<td colspan="5" valign="middle" style="vertical-align:middle;padding:0.5em;border:thin solid rgb(229,228,226)">HSBC0400002</td>
 								</tr>
 								<tr bgcolor="#fafafa" style="border-bottom:1px solid rgb(64,64,64);background-color:rgb(239,239,239)">
 									<td colspan="8" bgcolor="White" valign="middle" style="vertical-align:middle;border:thin solid rgb(229,228,226);background-color:white;padding:0.6em">If you have any queries please contact concerned person in AVH Polychem Private Limited<br><br>Kind Regards,<br>Sonal Mehta<br>AVH Polychem Pvt Ltd<br>Mobile : +91 8154014626 | Web: <a href="www.avh.co.in">www.avh.co.in</a> | Email: <a href="mailto:sonal@avh.co.in" target="_blank">sonal@avh.co.in</a></td>
