@@ -92,10 +92,12 @@ class EmailOutstandingNotification(Document):
 		sql_data = frappe.db.sql(query, as_dict=True)
 		i = 0
 		cuatomername=''
+		frappe.msgprint(query, title="Need Approval")
 		for row in sql_data:
 			already_due_amount = 0
 			outstanding_amount = 0
 			email_id = row.email_id
+			frappe.msgprint(email_id, title="Need Approval")
 			if email_id not in distinct_email_id:
 				frappe.msgprint(email_id, title="Need Approval")
 				distinct_email_id.add(email_id)
