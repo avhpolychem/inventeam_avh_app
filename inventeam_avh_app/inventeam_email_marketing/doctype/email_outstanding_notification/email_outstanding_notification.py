@@ -82,17 +82,17 @@ class EmailOutstandingNotification(Document):
 
 
 		if customer:
-			query = query + """ And `tabSales Invoice`.customer='{customer}' """
+			query = query + f""" And `tabSales Invoice`.customer='{customer}' """
 
 		if contact:
-			query = query + """ And `tabSales Invoice`.contact_person='{contact}' """
+			query = query + f""" And `tabSales Invoice`.contact_person='{contact}' """
 
 		query = query + """Order BY customer,email_id,due_date"""
 
 		sql_data = frappe.db.sql(query, as_dict=True)
 		i = 0
 		cuatomername=''
-		frappe.msgprint(query, title="Need Approval")
+
 		for row in sql_data:
 			already_due_amount = 0
 			outstanding_amount = 0
