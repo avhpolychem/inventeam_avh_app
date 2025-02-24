@@ -97,9 +97,7 @@ class EmailOutstandingNotification(Document):
 			already_due_amount = 0
 			outstanding_amount = 0
 			email_id = row.email_id
-			frappe.msgprint(email_id, title="Need Approval")
 			if email_id not in distinct_email_id:
-				frappe.msgprint(email_id, title="Need Approval")
 				distinct_email_id.add(email_id)
 				i += 1
 				if message_body_row != "<tbody>":
@@ -118,7 +116,7 @@ class EmailOutstandingNotification(Document):
 				cuatomername = row.customer
 				message_body_row = """<tbody>"""
 
-			frappe.msgprint(message_body_row, title="Need Approval")
+			#frappe.msgprint(message_body_row, title="Need Approval")
 			if row.Overdue_Days < 0:
 				already_due_amount = row.outstanding_amount
 			else:
