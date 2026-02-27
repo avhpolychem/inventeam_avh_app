@@ -1,8 +1,11 @@
 import frappe
 import json
+import os
+import subprocess
 from frappe.integrations.utils import make_post_request
 from datetime import datetime
 from frappe.model.document import Document
+from frappe.utils import get_site_path
 
 def save_whatsapp_api_data(api_key, api_url, template_name, whatsapp_number, contact_name, text_message):
     current_datetime = datetime.now()
@@ -28,7 +31,15 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
             "authorization": f"Basic {api_key}",
             "content-type": "application/json"
         }
-        
+    photo_url = "https://avhpolychem.frappe.cloud/files/AVHPL_Logo.jpg"
+    body_values = [contact_name + " ji", text_message]
+
+    if template_name == "stock_notification":
+        data_dict = convert_to_structure(text_message)
+        photo_url = generate_price_list_image(data_dict)
+        template_name = "stock_notification_m7"
+        body_values.pop(1)
+
     data = {
             "countryCode": "+91",
             "phoneNumber": whatsapp_number,
@@ -37,17 +48,14 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
             "template": {
                 "name": template_name,
                 "languageCode": "en",
-                "bodyValues": [
-                    contact_name + " ji",
-                    text_message,
-                ],
+                "bodyValues": body_values,
                 "fileName": "AVH_Logo.jpg",
                 "headerValues": [
-                    "https://avhpolychem.frappe.cloud/files/AVHPL_Logo.jpg"
+                    photo_url
                 ],
             }
         }
-    
+
     response = make_post_request(
         f"{api_url}",
         headers=headers,
@@ -244,3 +252,118 @@ class WhatsappStockNotification(Document):
                 
         self.message_count = i
         self.save()
+
+
+# Generate Image Link To Send Image into Stock Notification
+def generate_price_list_image(data):
+    try:
+        # 1️⃣ Render HTML
+        html = frappe.render_template(
+            "inventeam_avh_app/inventeam_interakt_whatsapp/doctype/whatsapp_stock_notification/stock_notification.html",
+            {"data": data},
+        )
+
+        # 2️⃣ Create Folder Path
+        folder_path = os.path.join(
+            get_site_path(), "public", "files", "customer_price_list"
+        )
+
+        # ✅ Create folder if not exists
+        os.makedirs(folder_path, exist_ok=True)
+
+        # 3️⃣ Output filename
+        filename = f"price_list_image_{frappe.generate_hash(length=8)}.png"
+        output_path = os.path.join(folder_path, filename)
+
+        # 4️⃣ wkhtmltoimage command
+        command = [
+            "wkhtmltoimage",
+            "--quality", "80",
+            "--width", "1600",
+            "--zoom", "2",
+            "--disable-smart-width",
+            "--enable-local-file-access",
+            "-",
+            output_path
+        ]
+
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+
+        stdout, stderr = process.communicate(input=html.encode("utf-8"))
+
+        # Optional: check if failed
+        if process.returncode != 0:
+            frappe.throw(f"Image generation failed: {stderr.decode()}")
+
+        return frappe.utils.get_url(f"/files/customer_price_list/{filename}")
+
+    except Exception as e:
+        frappe.log_error("Generate Stock Notification Image", f"Error generating image: {str(e)} \n\n\n Data: {str(data)}")
+
+
+# Convery Raw Text to Proper Dict Format
+def convert_to_structure(text):
+    try:
+        result = {}
+        current_warehouse = None
+        current_group = None
+
+        for line in text.splitlines():
+            line = line.strip()
+
+            if not line:
+                continue
+
+            # Detect Warehouse *_Warehouse_*
+            if line.startswith("*_") and line.endswith("_*"):
+                current_warehouse = line[2:-2].strip()
+                result.setdefault(current_warehouse, {})
+                current_group = None
+
+            # Detect Sub Group *Group*
+            elif line.startswith("*") and line.endswith("*"):
+                if current_warehouse:
+                    current_group = line[1:-1].strip()
+                    result[current_warehouse].setdefault(current_group, [])
+
+            # Detect Item
+            else:
+                if current_warehouse and current_group:
+                    if line not in result[current_warehouse][current_group]:
+                        result[current_warehouse][current_group].append(line)
+
+        # 🔥 Convert to Required LIST Structure
+        final_data = []
+
+        for warehouse_name in sorted(result.keys()):
+            subgroups = []
+
+            for group_name in sorted(result[warehouse_name].keys()):
+                subgroups.append({
+                    "name": group_name,
+                    "items": sorted(result[warehouse_name][group_name])
+                })
+
+            final_data.append({
+                "warehouse": warehouse_name,
+                "item_subgroups": subgroups
+            })
+
+        return final_data
+
+    except Exception as e:
+        frappe.log_error("Generate Stock Notification Raw Data", f"Error generating image: {str(e)} \n\n\n Data: {str(text)}")
+
+
+# Delete All Stock Notification Images
+def delete_all_stock_images():
+    folder_path = os.path.join(get_site_path(), "public", "files", "customer_price_list")
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
