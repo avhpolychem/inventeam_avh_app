@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+    body {
+        font-family: Inter, Arial, sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ---------------- HEADER ---------------- */
+    .header {
+        background: #ffffff;
+        padding: 20px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .header-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .header-table td {
+        border: none !important;
+        padding: 0;
+        vertical-align: middle;
+    }
+
+    .header-title {
+        text-align: right;
+        font-size: 30px;
+        font-weight: 900;
+        color: #2c2c2c;
+    }
+
+    /* ---------------- BODY ---------------- */
+
+    .container {
+        padding: 0 20px 20px 20px;
+    }
+
+    .warehouse {
+        background: #e6e6e6;
+        border-radius: 6px;
+        padding: 12px 15px;
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 20px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background: #ffffff;
+    }
+
+    .data-table td {
+        border: 1px solid #ddd;
+        padding: 10px 12px;
+        vertical-align: top;
+        font-size: 15px;
+    }
+
+    .group-name {
+        width: 30%;
+        font-weight: 600;
+        font-size: 16px;
+        background: #fafafa;
+    }
+
+    .group-items {
+        width: 70%;
+        line-height: 1.6;
+        word-break: break-word;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <table class="header-table">
+        <tr>
+            <td style="width: 50%;">
+                <img src="https://avhpolychem.frappe.cloud/files/AVH Logo.jpg"
+                     style="height:60px; width: 150px;">
+            </td>
+            <td class="header-title" style="width: 50%;">
+                PRODUCT LIST
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="container">
+
+    {% for warehouse in data %}
+        
+        <div class="warehouse">
+            {{ warehouse.warehouse }}
+        </div>
+
+        <table class="data-table">
+            {% for subgroup in warehouse.item_subgroups %}
+                <tr>
+                    <td class="group-name">
+                        {{ subgroup.name }}
+                    </td>
+                    <td class="group-items">
+                        {{ subgroup.get("items") | join(", ") }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {% endfor %}
+
+</div>
+
+</body>
+</html>

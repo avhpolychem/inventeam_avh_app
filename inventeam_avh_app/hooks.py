@@ -133,6 +133,9 @@ scheduler_events = {
     "cron": {
 		"* * * * *": [
 			"inventeam_avh_app.tasks.send_whatsapp_stock_notification",
+		],
+        "30 2 * * *": [
+            "inventeam_avh_app.inventeam_interakt_whatsapp.doctype.whatsapp_stock_notification.whatsapp_stock_notification.delete_all_stock_images"
 		]
 	}
     #"weekly": [
