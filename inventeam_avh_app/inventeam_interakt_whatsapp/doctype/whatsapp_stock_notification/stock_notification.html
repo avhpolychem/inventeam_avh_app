@@ -2,18 +2,18 @@
 <html>
 <head>
 <meta charset="utf-8">
+
 <style>
     body {
-        font-family: Inter, Arial, sans-serif;
-        background: #f5f5f5;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f2f4f5;
         margin: 0;
         padding: 0;
     }
 
-    /* ---------------- HEADER ---------------- */
     .header {
         background: #ffffff;
-        padding: 20px;
+        padding: 20px 30px;
         border-bottom: 2px solid #e0e0e0;
     }
 
@@ -28,88 +28,92 @@
         vertical-align: middle;
     }
 
-    .header-title {
-        text-align: right;
-        font-size: 30px;
-        font-weight: 900;
-        color: #2c2c2c;
-    }
-
-    /* ---------------- BODY ---------------- */
-
     .container {
-        padding: 0 20px 20px 20px;
-    }
-
-    .warehouse {
-        background: #e6e6e6;
-        border-radius: 6px;
-        padding: 12px 15px;
-        font-size: 20px;
-        font-weight: 600;
-        margin-top: 20px;
+        padding: 15px 25px 30px 25px;
     }
 
     .data-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
+        margin-top: 12px;
         background: #ffffff;
+        border: 2px solid #0f2667;
     }
 
     .data-table td {
-        border: 1px solid #ddd;
-        padding: 10px 12px;
-        vertical-align: top;
+        border: 1px solid #0f2667;
+        padding: 12px 15px;
         font-size: 15px;
-    }
-
-    .group-name {
-        width: 30%;
-        font-weight: 600;
-        font-size: 16px;
-        background: #fafafa;
-    }
-
-    .group-items {
-        width: 70%;
-        line-height: 1.6;
-        word-break: break-word;
+        vertical-align: middle;
     }
 </style>
+
 </head>
 
 <body>
 
+<!-- HEADER -->
 <div class="header">
     <table class="header-table">
         <tr>
             <td style="width: 50%;">
                 <img src="https://avhpolychem.frappe.cloud/files/AVH Logo.jpg"
-                     style="height:60px; width: 150px;">
+                     style="height:60px; width:150px;">
             </td>
-            <td class="header-title" style="width: 50%;">
+            <td style="
+                width:50%;
+                text-align:right;
+                font-size:32px;
+                font-weight:900;
+                color:#083983 !important;
+                letter-spacing:1px;
+            ">
                 PRODUCT LIST
             </td>
         </tr>
     </table>
 </div>
 
+<!-- BODY -->
 <div class="container">
 
     {% for warehouse in data %}
         
-        <div class="warehouse">
+        <!-- WAREHOUSE TITLE -->
+        <div style="
+            margin-top:20px;
+            padding:14px;
+            font-size:28px;
+            font-weight:900;
+            text-align:center;
+            color:#1f2d3d !important;
+
+            /* Gradient fallback */
+            background:#cfe8ef;
+        ">
             {{ warehouse.warehouse }}
         </div>
 
+        <!-- TABLE -->
         <table class="data-table">
             {% for subgroup in warehouse.item_subgroups %}
                 <tr>
-                    <td class="group-name">
+                    <td style="
+                        font-weight:900;
+                        background:#f5f7f8;
+                        color:#0f2667 !important;
+                        font-size:20px;
+                    ">
                         {{ subgroup.name }}
                     </td>
-                    <td class="group-items">
+
+                    <td style="
+                        width:55%;
+                        line-height:1.6;
+                        word-break:break-word;
+                        font-size:20px;
+                        font-weight:600;
+                    ">
                         {{ subgroup.get("items") | join(", ") }}
                     </td>
                 </tr>

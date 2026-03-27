@@ -37,7 +37,7 @@ def send_whatsapp_message(api_key, api_url, template_name, whatsapp_number, cont
     if template_name == "stock_notification":
         data_dict = convert_to_structure(text_message)
         photo_url = generate_price_list_image(data_dict)
-        template_name = "stock_notification_m7"
+        template_name = "stock_notification_de"
         body_values.pop(1)
 
     data = {
