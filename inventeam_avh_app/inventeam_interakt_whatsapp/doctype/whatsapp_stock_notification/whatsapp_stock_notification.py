@@ -212,43 +212,43 @@ class WhatsappStockNotification(Document):
                 distinct_warehouse = set()
                 distinct_subgroup = set()
                 distinct_item = set()
-            else:
-                contact_name = row["contact_name"]
-                warehouse = row["warehouse"]
-                sub_group = row["sub_group"]
-                group = row["group"]
-                item_code = row["item_code"]
-                item_name = row["item_name"]
-                actual_qty = row["actual_qty"]
-                reserved_qty = row["reserved_qty"]
-                rem_qty = row["rem_qty"]
+
+            contact_name = row["contact_name"]
+            warehouse = row["warehouse"]
+            sub_group = row["sub_group"]
+            group = row["group"]
+            item_code = row["item_code"]
+            item_name = row["item_name"]
+            actual_qty = row["actual_qty"]
+            reserved_qty = row["reserved_qty"]
+            rem_qty = row["rem_qty"]
+            
+            if warehouse not in distinct_warehouse:
+                distinct_warehouse.add(warehouse)
+                distinct_subgroup = set()
+                distinct_item = set()
+                text_message += f"\\n*_{warehouse}_*\\n"
                 
-                if warehouse not in distinct_warehouse:
-                    distinct_warehouse.add(warehouse)
-                    distinct_subgroup = set()
-                    distinct_item = set()
-                    text_message += f"\\n*_{warehouse}_*\\n"
-                    
-                if sub_group not in distinct_subgroup:
-                    distinct_subgroup.add(sub_group)
-                    text_message += f"\\n*{sub_group}*\\n"
+            if sub_group not in distinct_subgroup:
+                distinct_subgroup.add(sub_group)
+                text_message += f"\\n*{sub_group}*\\n"
 
-                if item_code not in distinct_item:
-                    distinct_item.add(item_code)
-                    text_message += f"{item_code}\\n"
+            if item_code not in distinct_item:
+                distinct_item.add(item_code)
+                text_message += f"{item_code}\\n"
 
-                #text_message += f"{item_code}\\n"
+            #text_message += f"{item_code}\\n"
 
-                if index < len(sorted_contact_response) - 1:
-                    next_row = sorted_contact_response[index + 1]
-                    if next_row['whatsapp_number'] not in distinct_whatsapp_number:
-                        i += 1
-                        save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
-                        #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
-                else:
+            if index < len(sorted_contact_response) - 1:
+                next_row = sorted_contact_response[index + 1]
+                if next_row['whatsapp_number'] not in distinct_whatsapp_number:
                     i += 1
                     save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                     #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+            else:
+                i += 1
+                save_whatsapp_api_data(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
+                #enqueue_send_whatsapp_message(api_key,api_url, template_name, whatsapp_number, contact_name, text_message)
                 
         self.message_count = i
         self.save()
