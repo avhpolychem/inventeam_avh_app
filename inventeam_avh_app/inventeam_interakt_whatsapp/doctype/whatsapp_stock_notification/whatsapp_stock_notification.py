@@ -309,56 +309,88 @@ def generate_price_list_image(data):
 # Convery Raw Text to Proper Dict Format
 def convert_to_structure(text):
     try:
+        # ==========================================
+        # 🔥 STEP 1: HANDLE BOTH TEXT FORMATS
+        # ==========================================
+        if "\\n" in text:
+            text = text.encode().decode("unicode_escape")
+
+        # Normalize line breaks
+        text = text.replace("\r", "")
+
         result = {}
         current_warehouse = None
         current_group = None
 
-        for line in text.splitlines():
+        lines = text.split("\n")
+
+        for line in lines:
             line = line.strip()
 
             if not line:
                 continue
 
-            # Detect Warehouse *_Warehouse_*
+            # ==============================
+            # 🏭 Warehouse *_Warehouse_*
+            # ==============================
             if line.startswith("*_") and line.endswith("_*"):
                 current_warehouse = line[2:-2].strip()
-                result.setdefault(current_warehouse, {})
+
+                if current_warehouse not in result:
+                    result[current_warehouse] = {}
+
                 current_group = None
+                continue
 
-            # Detect Sub Group *Group*
-            elif line.startswith("*") and line.endswith("*"):
-                if current_warehouse:
-                    current_group = line[1:-1].strip()
-                    result[current_warehouse].setdefault(current_group, [])
+            # ==============================
+            # 📦 Group *Group*
+            # ==============================
+            elif line.startswith("*") and line.endswith("*") and not line.startswith("*_"):
+                if not current_warehouse:
+                    continue
 
-            # Detect Item
+                current_group = line.strip("*").strip()
+
+                if current_group not in result[current_warehouse]:
+                    result[current_warehouse][current_group] = []
+
+                continue
+
+            # ==============================
+            # 📄 Items
+            # ==============================
             else:
                 if current_warehouse and current_group:
                     if line not in result[current_warehouse][current_group]:
                         result[current_warehouse][current_group].append(line)
 
-        # 🔥 Convert to Required LIST Structure
+        # ==========================================
+        # 🔄 FINAL OUTPUT FORMAT
+        # ==========================================
         final_data = []
 
-        for warehouse_name in sorted(result.keys()):
+        for warehouse in sorted(result.keys()):
             subgroups = []
 
-            for group_name in sorted(result[warehouse_name].keys()):
+            for group in sorted(result[warehouse].keys()):
                 subgroups.append({
-                    "name": group_name,
-                    "items": sorted(result[warehouse_name][group_name])
+                    "name": group,
+                    "items": sorted(result[warehouse][group])
                 })
 
             final_data.append({
-                "warehouse": warehouse_name,
+                "warehouse": warehouse,
                 "item_subgroups": subgroups
             })
 
         return final_data
 
     except Exception as e:
-        frappe.log_error("Generate Stock Notification Raw Data", f"Error generating image: {str(e)} \n\n\n Data: {str(text)}")
-
+        frappe.log_error(
+            "Text Parse Error",
+            f"{str(e)}\n\nTEXT:\n{text}"
+        )
+        return []
 
 # Delete All Stock Notification Images
 def delete_all_stock_images():
